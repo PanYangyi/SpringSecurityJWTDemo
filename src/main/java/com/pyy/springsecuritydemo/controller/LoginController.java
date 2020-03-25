@@ -4,6 +4,7 @@ import com.pyy.springsecuritydemo.dao.UserRepository;
 import com.pyy.springsecuritydemo.domain.JwtAuthenticationResponse;
 import com.pyy.springsecuritydemo.domain.User;
 import com.pyy.springsecuritydemo.security.JwtUser;
+import com.pyy.springsecuritydemo.security.PhoneAndPasswordLoginAuthentication;
 import com.pyy.springsecuritydemo.utils.JwtTokenUtil;
 import com.pyy.springsecuritydemo.utils.JwtUserFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -49,5 +50,23 @@ public class LoginController {
         JwtUser jwtUser1 = JwtUserFactory.create(user);
 
         return new JwtAuthenticationResponse(token,jwtUser1);
+    }
+
+    /**
+     * 手机号密码登录
+     * @param phone
+     * @param password
+     * @return
+     */
+    @PostMapping(value = "loginPhone")
+    public JwtAuthenticationResponse loginPhone(String phone,String password){
+        log.info("===LoginController.loginPhone()===============");
+        PhoneAndPasswordLoginAuthentication authentication = new PhoneAndPasswordLoginAuthentication(phone, password);
+        Authentication authenticate = authenticationManager.authenticate(authentication);
+        JwtUser user = (JwtUser) authenticate.getPrincipal();
+        String token = jwtTokenUtil.createToken(user.getUsername(), false);
+        User byUsername = userRepository.findByUsername(user.getUsername());
+        JwtUser jwtUser = JwtUserFactory.create(byUsername);
+        return new JwtAuthenticationResponse(token,jwtUser);
     }
 }

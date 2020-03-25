@@ -1,6 +1,9 @@
 package com.pyy.springsecuritydemo.config;
 
+import com.pyy.springsecuritydemo.security.EntryPointUnauthorizedHandler;
 import com.pyy.springsecuritydemo.security.JwtAuthenticationTokenFilter;
+import com.pyy.springsecuritydemo.security.PhoneAndPasswordLoginAuthenticationProvider;
+import com.pyy.springsecuritydemo.service.JwtUserDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -31,9 +34,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private UserDetailsService userDetailsService;
 
+    @Autowired
+    private JwtUserDetailService jwtUserDetailService;
+
     //注入过滤器
     @Autowired
     private JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter;
+
+    @Autowired
+    private EntryPointUnauthorizedHandler entryPointUnauthorizedHandler;
 
     /**
      *  配置Security的整个过滤链，对每一个http请求进行过滤
@@ -68,12 +77,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 )
                 .permitAll()
                 //对于获取token的rest api要允许匿名访问
-                .antMatchers("/auth/**","/api/login").permitAll()
+                .antMatchers("/auth/**","/api/**").permitAll()
                 .anyRequest().authenticated();
         //禁用http缓存
         http.headers().cacheControl().disable();
         //添加jwt过滤器
         http.addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
+
+        //添加异常处理
+        http.exceptionHandling().authenticationEntryPoint(entryPointUnauthorizedHandler);
     }
 
     /**
@@ -85,6 +97,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 
         auth
+                .authenticationProvider(new PhoneAndPasswordLoginAuthenticationProvider(jwtUserDetailService))
                 //设置UserDetailsService
                 .userDetailsService(this.userDetailsService)
                 //使用BCrypt进行密码的hash

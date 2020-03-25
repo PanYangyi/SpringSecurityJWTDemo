@@ -35,6 +35,7 @@ public class RegistController {
 //        user.setPassword(bCryptPasswordEncoder.encode(registUser.getPassword()));
         user.setPassword(passwordEncoder.encode(registUser.getPassword()));
         user.setRole("ROLE_USER");
+        user.setPhone(registUser.getPhone());
         User save = userRepository.save(user);
         return save.toString();
     }

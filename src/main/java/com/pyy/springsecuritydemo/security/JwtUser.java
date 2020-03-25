@@ -26,12 +26,15 @@ public class JwtUser implements UserDetails {
 
     private String password;
 
+    private String phone;
+
     private Collection<? extends GrantedAuthority> authorities;
 
     public JwtUser(User user){
         this.id = user.getId();
         this.username = user.getUsername();
         this.password = user.getPassword();
+        this.phone = user.getPhone();
         this.authorities = Collections.singleton(new SimpleGrantedAuthority(user.getRole()));
     }
 
