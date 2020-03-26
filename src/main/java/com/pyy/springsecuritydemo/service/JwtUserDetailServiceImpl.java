@@ -48,7 +48,7 @@ public class JwtUserDetailServiceImpl implements JwtUserDetailService, UserDetai
      * @return
      */
     @Override
-    public UserDetails loadUserByPhone(String phone,String password){
+    public UserDetails loadUserByPhone(String phone,String password) throws PasswordErroeException,PhoneErrorException{
         User userByPhone = userRepository.findByPhone(phone);
 
         if (userByPhone == null){
